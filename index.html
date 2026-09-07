@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --petrol:#0C3B33;
+  --petrol-soft:#14544a;
+  --ochre:#B07A2C;
+  --paper:#F4F6F2;
+  --linie:#D6DCD4;
+  --rot:#A8392B;
+  --gruen:#2F7D5B;
+  --tinte:#0C3B33;
+  --grau:#6B7A72;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);
+  color:var(--tinte);
+  font-family:Inter,system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.55;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+h1,h2,h3,.display{font-family:'Space Grotesk',Inter,sans-serif;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+a{color:var(--petrol)}
+:focus-visible{outline:2px solid var(--ochre);outline-offset:2px;border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.wrap{max-width:860px;margin:0 auto;padding:0 18px}
+
+/* ---------- Gate ---------- */
+#gate{
+  position:fixed;inset:0;z-index:100;
+  background:var(--petrol);color:var(--paper);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+#gate .box{width:100%;max-width:340px}
+#gate .mark{width:34px;height:3px;background:var(--ochre);margin-bottom:22px}
+#gate h1{font-size:26px;font-weight:700;margin-bottom:6px}
+#gate p{color:#9DB5AE;font-size:14px;margin-bottom:22px}
+#gate input{
+  width:100%;padding:13px 14px;border:1px solid #2C5E55;border-radius:8px;
+  background:#0A322B;color:var(--paper);font-size:16px;
+}
+#gate input::placeholder{color:#6E8B84}
+#gate button{
+  width:100%;margin-top:10px;padding:13px;border-radius:8px;
+  background:var(--ochre);color:#1a1207;font-weight:600;font-size:15px;
+}
+#gate .err{color:#E9A79B;font-size:13px;margin-top:10px;min-height:18px}
+
+/* ---------- Kopf ---------- */
+header.top{background:var(--petrol);color:var(--paper);padding:26px 0 22px}
+header.top .eyebrow{color:var(--ochre);font-size:12px;font-weight:600;letter-spacing:.04em;margin-bottom:6px}
+header.top h1{font-size:25px;font-weight:700;line-height:1.2}
+header.top .sub{color:#9DB5AE;font-size:14px;margin-top:8px}
+header.top .sub b{color:var(--paper);font-weight:600}
+
+/* ---------- Strecke ---------- */
+.strecke{margin:18px 0 4px;border-top:1px solid #235049;padding-top:16px}
+.stop{display:grid;grid-template-columns:16px 1fr auto;gap:12px;align-items:center;padding:5px 0;position:relative}
+.stop .dot{
+  width:11px;height:11px;border-radius:50%;border:2px solid var(--ochre);
+  background:var(--petrol);margin-left:2px;position:relative;z-index:2;
+}
+.stop .dot.full{background:var(--ochre)}
+.stop::before{
+  content:"";position:absolute;left:7px;top:0;bottom:0;width:2px;background:#235049;z-index:1;
+}
+.stop:first-child::before{top:50%}
+.stop:last-child::before{bottom:50%}
+.stop .name{font-size:14px;font-weight:500}
+.stop .bar{height:4px;background:#235049;border-radius:2px;margin-top:5px;overflow:hidden;max-width:220px}
+.stop .bar i{display:block;height:100%;background:var(--ochre);border-radius:2px}
+.stop .zahl{font-size:12px;color:#9DB5AE;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- Abschnitte ---------- */
+section{padding:26px 0;border-bottom:1px solid var(--linie)}
+section:last-of-type{border-bottom:none}
+h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.lead{color:var(--grau);font-size:13.5px;margin-bottom:16px}
+
+/* ---------- Filter ---------- */
+.filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px;-webkit-overflow-scrolling:touch}
+.filter::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;padding:6px 12px;border:1px solid var(--linie);border-radius:20px;
+  background:#fff;font-size:13px;font-weight:500;white-space:nowrap;
+}
+.chip[aria-pressed="true"]{background:var(--petrol);color:var(--paper);border-color:var(--petrol)}
+.suche{
+  width:100%;padding:11px 13px;border:1px solid var(--linie);border-radius:8px;
+  background:#fff;font-size:16px;margin-bottom:14px;
+}
+
+/* ---------- Asset-Zeilen ---------- */
+.gruppe{margin-bottom:20px}
+.gruppe h3{
+  font-size:12px;font-weight:700;color:var(--grau);
+  padding-bottom:6px;border-bottom:1px solid var(--linie);margin-bottom:2px;
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.gruppe h3 span{font-weight:500;font-variant-numeric:tabular-nums}
+.zeile{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start;padding:9px 0;border-bottom:1px solid #E7EBE5}
+.zeile:last-child{border-bottom:none}
+.status{
+  width:20px;height:20px;border-radius:5px;border:1.5px solid var(--linie);
+  background:#fff;margin-top:1px;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;
+}
+.status.fertig{background:var(--gruen);border-color:var(--gruen)}
+.status.arbeit{background:var(--ochre);border-color:var(--ochre)}
+.titel{font-size:14.5px;line-height:1.4}
+.zeile.done .titel{color:var(--grau)}
+.nr{color:var(--grau);font-variant-numeric:tabular-nums;font-size:13px}
+.meta{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.link-an{
+  font-size:12.5px;font-weight:600;color:var(--petrol);text-decoration:none;
+  border-bottom:1.5px solid var(--ochre);padding-bottom:1px;
+}
+.link-add{font-size:12.5px;color:var(--grau);text-decoration:underline;text-underline-offset:2px}
+.tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:10px;background:#E8EDE6;color:var(--grau)}
+.tag.gratis{background:#DFF0E7;color:var(--gruen)}
+.tag.launch{background:#F6E9D5;color:#8A5E1F}
+.leer{color:var(--grau);font-size:14px;padding:20px 0;text-align:center}
+
+/* ---------- Ampel / Backlog ---------- */
+.ampel{list-style:none}
+.ampel li{display:grid;grid-template-columns:20px 1fr;gap:11px;padding:10px 0;border-bottom:1px solid #E7EBE5;align-items:start}
+.ampel li:last-child{border-bottom:none}
+.ampel .titel{font-size:14.5px}
+.ampel .note{font-size:12.5px;color:var(--grau);margin-top:2px}
+.ampel li.krit .titel{font-weight:600}
+.ampel li.krit .note{color:var(--rot)}
+.ampel li.erledigt .titel{color:var(--grau);text-decoration:line-through}
+
+.todo-neu{display:flex;gap:8px;margin-top:12px}
+.todo-neu input{flex:1;padding:10px 12px;border:1px solid var(--linie);border-radius:8px;background:#fff;font-size:16px}
+.todo-neu button{padding:10px 16px;border-radius:8px;background:var(--petrol);color:var(--paper);font-weight:600;font-size:14px}
+.del{color:var(--grau);font-size:12px;text-decoration:underline;text-underline-offset:2px;margin-left:8px}
+
+/* ---------- Validierung ---------- */
+.valid{background:#fff;border:1px solid var(--linie);border-left:4px solid var(--ochre);border-radius:6px;padding:16px}
+.valid .zahl{font-family:'Space Grotesk';font-size:34px;font-weight:700;line-height:1}
+.valid .zahl input{
+  width:2.6em;border:none;border-bottom:2px solid var(--linie);background:none;
+  font:inherit;text-align:center;padding:0;
+}
+.valid .ziel{color:var(--grau);font-size:14px;margin-left:6px;font-family:Inter}
+.valid .bar{height:8px;background:#E8EDE6;border-radius:4px;margin:12px 0 8px;overflow:hidden}
+.valid .bar i{display:block;height:100%;background:var(--ochre);border-radius:4px}
+.valid p{font-size:13px;color:var(--grau)}
+
+/* ---------- Fakten ---------- */
+.fakten{list-style:none;font-size:14px}
+.fakten li{display:grid;grid-template-columns:minmax(110px,34%) 1fr;gap:12px;padding:8px 0;border-bottom:1px solid #E7EBE5}
+.fakten li:last-child{border-bottom:none}
+.fakten dt,.fakten .k{color:var(--grau);font-size:13px}
+.hinweis{background:#fff;border-left:4px solid var(--rot);padding:12px 14px;border-radius:0 6px 6px 0;font-size:13.5px;margin-top:14px}
+.hinweis b{color:var(--rot)}
+.info{background:#fff;border-left:4px solid var(--petrol);padding:12px 14px;border-radius:0 6px 6px 0;font-size:13.5px;margin-top:14px}
+
+/* ---------- Werkzeugleiste ---------- */
+.werkzeug{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.werkzeug button{
+  padding:9px 14px;border:1px solid var(--linie);border-radius:8px;background:#fff;
+  font-size:13px;font-weight:500;
+}
+footer{padding:24px 0 40px;color:var(--grau);font-size:12.5px}
+footer p+p{margin-top:8px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="box">
+    <div class="mark"></div>
+    <h1>Cockpit</h1>
+    <p>Interner Projektstand. Bitte Passwort eingeben.</p>
+    <input id="pw" type="password" placeholder="Passwort" autocomplete="current-password" enterkeyhint="go">
+    <button id="pwbtn">Öffnen</button>
+    <div class="err" id="pwerr"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Fahrplan für angehende Finanzberater</div>
+    <h1>Wo das Projekt gerade steht</h1>
+    <div class="sub"><b id="gesamt">–</b> von <b id="gesamtmax">–</b> Bausteinen fertig · Launch noch nicht freigegeben</div>
+    <div class="strecke" id="strecke"></div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2>Bibliothek</h2>
+    <p class="lead">Alle Einheiten und Tools. Tippe das Kästchen für den Status, „Link setzen" hinterlegt die URL.</p>
+    <div class="filter" id="filter"></div>
+    <input class="suche" id="suche" type="search" placeholder="Suchen …" enterkeyhint="search">
+    <div id="liste"></div>
+  </section>
+
+  <section>
+    <h2>Vor dem Verkauf</h2>
+    <p class="lead">Solange hier etwas offen ist, darf nichts live gehen.</p>
+    <ul class="ampel" id="blocker"></ul>
+  </section>
+
+  <section>
+    <h2>Als Nächstes</h2>
+    <p class="lead">Was gerade dran ist.</p>
+    <ul class="ampel" id="todos"></ul>
+    <div class="todo-neu">
+      <input id="todoinput" type="text" placeholder="Neue Aufgabe" enterkeyhint="done">
+      <button id="todoadd">Hinzufügen</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Validierung</h2>
+    <p class="lead">Der einzige Wert hier, der über Erfolg entscheidet.</p>
+    <div class="valid">
+      <div><span class="zahl"><input id="anmeldungen" type="number" min="0" inputmode="numeric" value="0"></span><span class="ziel">von 50 Anmeldungen auf der Warteliste</span></div>
+      <div class="bar"><i id="validbar" style="width:0%"></i></div>
+      <p id="validtext">Noch keine Warteliste. Das ist das größte offene Risiko im Projekt.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Nachschlagen</h2>
+    <p class="lead">Die Zahlen und Entscheidungen, die du ständig brauchst.</p>
+    <ul class="fakten">
+      <li><span class="k">Preis</span><span>9,99 € Einführung → später 19–29 €, „wächst laufend, Updates gratis"</span></li>
+      <li><span class="k">Plattform</span><span>Digistore24 als Reseller · ca. 7,9 % + 1 € pro Verkauf</span></li>
+      <li><span class="k">Auslieferung</span><span>Download-Tresor (ZIP) · Mitgliederbereich erst bei Bedarf</span></li>
+      <li><span class="k">Rechtsform</span><span>Kleingewerbe · Kleinunternehmer § 19 UStG (Grenzen 25.000 € / 100.000 €)</span></li>
+      <li><span class="k">Umfang</span><span>47 Lern-Einheiten in 5 Teilen + 20 Tools</span></li>
+      <li><span class="k">Farben</span><span>Petrol #0C3B33 · Ochre #B07A2C · Paper #F4F6F2 · Linie #D6DCD4 · Rot #A8392B · Grün #2F7D5B</span></li>
+      <li><span class="k">Schriften</span><span>Space Grotesk (Display) + Inter (Text) · DejaVu Sans in PDFs</span></li>
+      <li><span class="k">Bauform</span><span>Was ist das? → Warum brauchst du es? → Quiz → Checkliste · zwei interaktive Bausteine · ein visueller Aha-Moment, jedes Mal in anderer Form</span></li>
+    </ul>
+    <div class="hinweis"><b>Feste Regel:</b> Der Arbeitgeber wird nirgends namentlich genannt — in keiner Einheit, keinem Artefakt, keiner Datei. Immer „Arbeitgeber" oder „Strukturvertrieb".</div>
+    <div class="info">Diese Seite liegt öffentlich auf GitHub Pages. Das Passwort ist ein Vorhang, kein Schloss — der Quelltext ist lesbar. Hier gehört nichts hinein, was nicht auch öffentlich im Repo stehen dürfte.</div>
+  </section>
+
+  <section>
+    <h2>Daten</h2>
+    <p class="lead">Dein Stand liegt nur in diesem Browser. Beim Gerätewechsel exportieren und drüben einlesen.</p>
+    <div class="werkzeug">
+      <button id="export">Stand sichern</button>
+      <button id="import">Stand einlesen</button>
+      <button id="pwchange">Passwort ändern</button>
+      <button id="reset">Alles zurücksetzen</button>
+    </div>
+    <input type="file" id="importfile" accept="application/json" class="hidden">
+  </section>
+
+  <footer>
+    <p>Interner Projektstand, Stand September 2026. Dient der Organisation, keine Rechts- oder Steuerberatung.</p>
+    <p>Später möglich: aus dieser Seite wird der Kurs-Hub für Käufer — Bibliothek und Fortschritt bleiben, Ampel, Backlog und Validierung fliegen raus, die Links zeigen auf die Einheiten im Download-Tresor.</p>
+  </footer>
+
+</div>
+</div>
+
+<script>
+/* ============ Passwort ============
+   SHA-256 von "fahrplan2026". Zum Ändern den Knopf "Passwort ändern" nutzen. */
+var PW_HASH = "b54a0515015d595f371ac497f1195c0d5a44f3c9c2335a128ff0f48bec7f8b99";
+
+async function sha256(t){
+  var b = new TextEncoder().encode(t);
+  var h = await crypto.subtle.digest("SHA-256", b);
+  return Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,"0")}).join("");
+}
+
+var gate = document.getElementById("gate"),
+    app  = document.getElementById("app"),
+    pw   = document.getElementById("pw"),
+    pwerr= document.getElementById("pwerr");
+
+function oeffnen(){
+  gate.classList.add("hidden");
+  app.classList.remove("hidden");
+  document.title = "Cockpit · Fahrplan";
+  render();
+}
+async function pruefen(){
+  var eingabe = pw.value.trim();
+  if(!eingabe){ pwerr.textContent = "Bitte Passwort eingeben."; return; }
+  var h;
+  try { h = await sha256(eingabe); }
+  catch(e){ pwerr.textContent = "Prüfung nicht möglich — die Seite muss über https laufen."; return; }
+  var soll = localStorage.getItem("fp_pw") || PW_HASH;
+  if(h === soll){ sessionStorage.setItem("fp_offen","1"); oeffnen(); }
+  else { pwerr.textContent = "Passwort stimmt nicht."; pw.select(); }
+}
+document.getElementById("pwbtn").addEventListener("click", pruefen);
+pw.addEventListener("keydown", function(e){ if(e.key === "Enter") pruefen(); });
+if(sessionStorage.getItem("fp_offen") === "1"){ oeffnen(); } else { setTimeout(function(){pw.focus()}, 250); }
+
+/* ============ Daten ============ */
+var TEILE = [
+  {id:"0", name:"Grundlagen", note:"gratis"},
+  {id:"1", name:"Versicherungen im Detail"},
+  {id:"2", name:"Berufsgruppen-Profile"},
+  {id:"3", name:"Vorsorge & Geldanlage"},
+  {id:"4", name:"Praxis & Profi-Wissen"},
+  {id:"T", name:"Tools & Rechner"}
+];
+
+var AVURL = "https://arne364.github.io/Das-Neue-AV-Depot/";
+
+var SEED = [
+  ["0",1,"Der Einstieg ins Berufsfeld","fertig","gratis",""],
+  ["0",2,"Das Fachwissen","fertig","gratis",""],
+  ["0",3,"Der Beratungsprozess","fertig","gratis",""],
+
+  ["1",1,"Berufsunfähigkeit — Grundlagen","fertig","launch",""],
+  ["1",2,"BU-Besonderheiten: Verweisung, DU-Klausel, Nachversicherung","fertig","launch",""],
+  ["1",3,"Risikolebensversicherung","fertig","launch",""],
+  ["1",4,"Private Haftpflicht","fertig","launch",""],
+  ["1",5,"Private Krankenversicherung (PKV)","fertig","launch",""],
+  ["1",6,"GKV-Zusatz: Zahn, stationär, ambulant","fertig","",""],
+  ["1",7,"Pflege(zusatz)versicherung","fertig","launch",""],
+  ["1",8,"Grundfähigkeitsversicherung","fertig","",""],
+  ["1",9,"Krankentagegeld","fertig","",""],
+  ["1",10,"Dread-Disease / Schwere Krankheiten","fertig","",""],
+  ["1",11,"Private Unfallversicherung","fertig","",""],
+  ["1",12,"Hausratversicherung","fertig","",""],
+  ["1",13,"Wohngebäudeversicherung","fertig","",""],
+  ["1",14,"Kfz-Versicherung","fertig","",""],
+  ["1",15,"Rechtsschutzversicherung","fertig","",""],
+  ["1",16,"Tierhalterhaftpflicht","fertig","",""],
+  ["1",17,"Auslandsreise-Krankenversicherung","fertig","",""],
+  ["1",18,"Gewerbe- & Betriebshaftpflicht","fertig","",""],
+  ["1",19,"Sterbegeld & Bestattungsvorsorge","fertig","",""],
+
+  ["2",1,"Beamte — Beihilfe & DU-Klausel","fertig","launch",""],
+  ["2",2,"Angestellte","fertig","launch",""],
+  ["2",3,"Selbstständige, Freiberufler & Kammerberufe","fertig","launch",""],
+  ["2",4,"Soldaten, Polizei & Feuerwehr","fertig","",""],
+  ["2",5,"Handwerker & körperliche Berufe","fertig","",""],
+  ["2",6,"Ärzte & Heilberufe","fertig","",""],
+  ["2",7,"Studenten & Auszubildende","fertig","",""],
+  ["2",8,"Junge Familien & Eltern","fertig","",""],
+  ["2",9,"Berufseinsteiger","fertig","",""],
+  ["2",10,"Gutverdiener & Führungskräfte","offen","",""],
+  ["2",11,"Best Ager / rentennah","offen","",""],
+  ["2",12,"Existenzgründer","offen","",""],
+
+  ["3",1,"Gesetzliche Rente & Versorgungslücke","offen","",""],
+  ["3",2,"Rürup-/Basisrente","offen","",""],
+  ["3",3,"Betriebliche Altersvorsorge & Durchführungswege","offen","",""],
+  ["3",4,"Riester & das neue Altersvorsorgedepot","offen","",""],
+  ["3",5,"Private & fondsgebundene Rentenversicherung","offen","",""],
+  ["3",6,"ETF & Wertpapierdepot","offen","",""],
+  ["3",7,"Immobilie als Kapitalanlage","offen","",""],
+  ["3",8,"Steuer in der Vorsorge (vertieft)","offen","",""],
+
+  ["4",1,"Der Schadenfall: was im Ernstfall zählt","offen","",""],
+  ["4",2,"Stornohaftung & Bestandsaufbau","offen","",""],
+  ["4",3,"Compliance & Dokumentation","offen","",""],
+  ["4",4,"Akquise & Empfehlungsmanagement","offen","",""],
+  ["4",5,"Typische Anfängerfehler vermeiden","offen","",""],
+
+  ["T",1,"Versicherungs-Kompendium","fertig","launch",""],
+  ["T",2,"Versorgungslücken-Rechner","fertig","launch",AVURL],
+  ["T",3,"BU-Bedarfsrechner","offen","launch",""],
+  ["T",4,"Risikoleben-Summen-Rechner","offen","",""],
+  ["T",5,"Hausrat-Versicherungssumme (650 €/m²)","offen","launch",""],
+  ["T",6,"Haftpflicht-Deckungs-Check","offen","",""],
+  ["T",7,"Drei-Schichten-Vorsorge-Planer","offen","",""],
+  ["T",8,"Altersvorsorgedepot-Zulagen-Rechner 2027","fertig","",AVURL],
+  ["T",9,"bAV-Hebel-Rechner (Entgeltumwandlung)","fertig","",AVURL],
+  ["T",10,"ETF-Sparplan-Rechner (Zinseszins)","offen","",""],
+  ["T",11,"Fondspolice vs. Depot (12/62-Kipppunkt)","fertig","",AVURL],
+  ["T",12,"Tilgungs-/Annuitäten-Rechner","offen","",""],
+  ["T",13,"Kaufnebenkosten-Rechner (Immobilie)","offen","",""],
+  ["T",14,"Mietrendite-Rechner","offen","",""],
+  ["T",15,"Provisions-Rechner (Promille → €)","offen","",""],
+  ["T",16,"Stornohaftungs-Rechner","offen","",""],
+  ["T",17,"Digitaler Bedarfsanalyse-Bogen","offen","launch",""],
+  ["T",18,"Abgeltungsteuer & Sparerpauschbetrag","offen","",""],
+  ["T",19,"Pflegelücken-Rechner","offen","",""],
+  ["T",20,"Berufsgruppen-Bedarfs-Matrix","offen","",""]
+];
+
+var BLOCKER_SEED = [
+  ["b1","Freigabe für die Nebentätigkeit einholen","Der kritischste Punkt. Ohne Klärung mit dem Arbeitgeber ist alles andere Makulatur.",true],
+  ["b2","Kleingewerbe anmelden","Ein Formular beim Gewerbeamt.",false],
+  ["b3","Steuernummer über ELSTER","Rechne mit ein bis zwei Wochen Postlaufzeit für die Freischaltung.",false],
+  ["b4","Impressum, Datenschutz, Widerruf, Disclaimer","Müssen stehen, bevor eine Verkaufsseite online geht. Digistore prüft das Impressum.",false],
+  ["b5","Verkaufs-Landingpage","Hero, was drin ist, drei Gratis-Module, Gründerpreis, FAQ, Kaufen-Button.",false],
+  ["b6","Opt-in-Seite und E-Mail-Tool","Brevo oder KlickTipp. Voraussetzung für die Warteliste.",false],
+  ["b7","Digistore24-Produkt anlegen und Testkauf","Plan auf 9,99 € setzen, 37-€-Standard löschen, Tresor befüllen, einreichen.",false]
+];
+
+var TODO_SEED = [
+  "Teil 2, Einheit 10: Gutverdiener & Führungskräfte",
+  "Teil 2, Einheit 11: Best Ager",
+  "Teil 2, Einheit 12: Existenzgründer",
+  "Landingpage bauen und Warteliste starten",
+  "Bedarfsanalyse-Bogen als Standalone-Tool",
+  "BU-Bedarfsrechner aus Einheit 1 herauslösen"
+];
+
+/* ============ Zustand ============ */
+var KEY = "fp_cockpit_v1";
+var state = laden();
+
+function frisch(){
+  var items = {}, i, s;
+  for(i=0;i<SEED.length;i++){
+    s = SEED[i];
+    items[s[0]+"-"+s[1]] = {status:s[3], link:s[5]};
+  }
+  var blocker = {};
+  for(i=0;i<BLOCKER_SEED.length;i++){ blocker[BLOCKER_SEED[i][0]] = false; }
+  var todos = TODO_SEED.map(function(t,n){ return {id:"t"+n, text:t, done:false}; });
+  return {items:items, blocker:blocker, todos:todos, anmeldungen:0};
+}
+function laden(){
+  try{
+    var roh = localStorage.getItem(KEY);
+    if(!roh) return frisch();
+    var g = JSON.parse(roh), basis = frisch();
+    if(g.items) for(var k in g.items){ if(basis.items[k]) basis.items[k] = g.items[k]; }
+    if(g.blocker) for(var b in g.blocker){ basis.blocker[b] = !!g.blocker[b]; }
+    if(Array.isArray(g.todos)) basis.todos = g.todos;
+    if(typeof g.anmeldungen === "number") basis.anmeldungen = g.anmeldungen;
+    return basis;
+  }catch(e){ return frisch(); }
+}
+function sichern(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+/* ============ Ansicht ============ */
+var aktiverTeil = "alle", suchbegriff = "";
+
+function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function eintraege(teil){ return SEED.filter(function(s){ return s[0] === teil; }); }
+function fertigZahl(teil){
+  return eintraege(teil).filter(function(s){ return state.items[s[0]+"-"+s[1]].status === "fertig"; }).length;
+}
+
+function renderStrecke(){
+  var html = "", gesamt = 0, max = 0;
+  TEILE.forEach(function(t){
+    var f = fertigZahl(t.id), n = eintraege(t.id).length, p = n ? Math.round(f/n*100) : 0;
+    gesamt += f; max += n;
+    html += '<div class="stop">'
+      + '<div class="dot' + (p === 100 ? " full" : "") + '"></div>'
+      + '<div><div class="name">' + esc(t.name) + '</div>'
+      + '<div class="bar"><i style="width:' + p + '%"></i></div></div>'
+      + '<div class="zahl">' + f + "/" + n + "</div></div>";
+  });
+  document.getElementById("strecke").innerHTML = html;
+  document.getElementById("gesamt").textContent = gesamt;
+  document.getElementById("gesamtmax").textContent = max;
+}
+
+function renderFilter(){
+  var html = '<button class="chip" data-teil="alle" aria-pressed="' + (aktiverTeil === "alle") + '">Alle</button>';
+  TEILE.forEach(function(t){
+    var label = t.id === "T" ? "Tools" : "Teil " + t.id;
+    html += '<button class="chip" data-teil="' + t.id + '" aria-pressed="' + (aktiverTeil === t.id) + '">' + label + "</button>";
+  });
+  document.getElementById("filter").innerHTML = html;
+}
+
+function renderListe(){
+  var q = suchbegriff.toLowerCase(), html = "", treffer = 0;
+  TEILE.forEach(function(t){
+    if(aktiverTeil !== "alle" && aktiverTeil !== t.id) return;
+    var rows = eintraege(t.id).filter(function(s){ return !q || s[2].toLowerCase().indexOf(q) > -1; });
+    if(!rows.length) return;
+    treffer += rows.length;
+    html += '<div class="gruppe"><h3>' + esc(t.name) + "<span>" + fertigZahl(t.id) + " von " + eintraege(t.id).length + "</span></h3>";
+    rows.forEach(function(s){
+      var key = s[0] + "-" + s[1], d = state.items[key];
+      var mark = d.status === "fertig" ? "✓" : (d.status === "arbeit" ? "•" : "");
+      var kl = d.status === "fertig" ? "fertig" : (d.status === "arbeit" ? "arbeit" : "");
+      html += '<div class="zeile' + (d.status === "fertig" ? " done" : "") + '">'
+        + '<button class="status ' + kl + '" data-key="' + key + '" aria-label="Status ändern">' + mark + "</button>"
+        + '<div><div class="titel"><span class="nr">' + s[1] + "</span> " + esc(s[2]) + "</div><div class=\"meta\">"
+        + (s[4] === "gratis" ? '<span class="tag gratis">gratis</span>' : "")
+        + (s[4] === "launch" ? '<span class="tag launch">Launch-Paket</span>' : "")
+        + (d.link
+            ? '<a class="link-an" href="' + esc(d.link) + '" target="_blank" rel="noopener">Öffnen</a><button class="link-add" data-link="' + key + '">ändern</button>'
+            : '<button class="link-add" data-link="' + key + '">Link setzen</button>')
+        + "</div></div><div></div></div>";
+    });
+    html += "</div>";
+  });
+  document.getElementById("liste").innerHTML = treffer ? html : '<div class="leer">Nichts gefunden. Anderer Suchbegriff oder Filter?</div>';
+}
+
+function renderBlocker(){
+  var html = "";
+  BLOCKER_SEED.forEach(function(b){
+    var done = state.blocker[b[0]];
+    html += '<li class="' + (b[3] ? "krit " : "") + (done ? "erledigt" : "") + '">'
+      + '<button class="status ' + (done ? "fertig" : "") + '" data-blocker="' + b[0] + '" aria-label="Erledigt?">' + (done ? "✓" : "") + "</button>"
+      + "<div><div class=\"titel\">" + esc(b[1]) + '</div><div class="note">' + esc(b[2]) + "</div></div></li>";
+  });
+  document.getElementById("blocker").innerHTML = html;
+}
+
+function renderTodos(){
+  var html = "";
+  state.todos.forEach(function(t){
+    html += '<li class="' + (t.done ? "erledigt" : "") + '">'
+      + '<button class="status ' + (t.done ? "fertig" : "") + '" data-todo="' + t.id + '" aria-label="Erledigt?">' + (t.done ? "✓" : "") + "</button>"
+      + '<div><div class="titel">' + esc(t.text) + '<button class="del" data-delete="' + t.id + '">löschen</button></div></div></li>';
+  });
+  document.getElementById("todos").innerHTML = html || '<div class="leer">Nichts offen. Trag ein, was als Nächstes dran ist.</div>';
+}
+
+function renderValid(){
+  var n = state.anmeldungen, p = Math.min(100, Math.round(n/50*100));
+  document.getElementById("anmeldungen").value = n;
+  document.getElementById("validbar").style.width = p + "%";
+  var t = document.getElementById("validtext");
+  if(n === 0) t.textContent = "Noch keine Warteliste. Das ist das größte offene Risiko im Projekt.";
+  else if(n < 20) t.textContent = "Angefangen. Unter 20 Anmeldungen sagt die Zahl noch wenig aus.";
+  else if(n < 40) t.textContent = "Wird belastbar. Ab etwa 40 echten Anmeldungen lohnt die Gewerbeanmeldung.";
+  else t.textContent = "Validiert genug für den Launch. Jetzt Phase 0 abräumen und verkaufen.";
+}
+
+function render(){ renderStrecke(); renderFilter(); renderListe(); renderBlocker(); renderTodos(); renderValid(); }
+
+/* ============ Bedienung ============ */
+document.getElementById("filter").addEventListener("click", function(e){
+  var b = e.target.closest("[data-teil]"); if(!b) return;
+  aktiverTeil = b.dataset.teil; renderFilter(); renderListe();
+});
+document.getElementById("suche").addEventListener("input", function(e){
+  suchbegriff = e.target.value; renderListe();
+});
+document.getElementById("liste").addEventListener("click", function(e){
+  var s = e.target.closest("[data-key]");
+  if(s){
+    var d = state.items[s.dataset.key];
+    d.status = d.status === "offen" ? "arbeit" : (d.status === "arbeit" ? "fertig" : "offen");
+    sichern(); renderListe(); renderStrecke(); return;
+  }
+  var l = e.target.closest("[data-link]");
+  if(l){
+    var key = l.dataset.link, jetzt = state.items[key].link || "";
+    var neu = prompt("URL für diese Einheit (leer lassen zum Entfernen):", jetzt);
+    if(neu === null) return;
+    neu = neu.trim();
+    if(neu && !/^https?:\/\//i.test(neu)) neu = "https://" + neu;
+    state.items[key].link = neu;
+    sichern(); renderListe();
+  }
+});
+document.getElementById("blocker").addEventListener("click", function(e){
+  var b = e.target.closest("[data-blocker]"); if(!b) return;
+  state.blocker[b.dataset.blocker] = !state.blocker[b.dataset.blocker];
+  sichern(); renderBlocker();
+});
+document.getElementById("todos").addEventListener("click", function(e){
+  var d = e.target.closest("[data-delete]");
+  if(d){ state.todos = state.todos.filter(function(t){ return t.id !== d.dataset.delete; }); sichern(); renderTodos(); return; }
+  var t = e.target.closest("[data-todo]");
+  if(t){
+    state.todos.forEach(function(x){ if(x.id === t.dataset.todo) x.done = !x.done; });
+    sichern(); renderTodos();
+  }
+});
+function todoAdd(){
+  var i = document.getElementById("todoinput"), v = i.value.trim();
+  if(!v) return;
+  state.todos.push({id:"t" + Date.now(), text:v, done:false});
+  i.value = ""; sichern(); renderTodos();
+}
+document.getElementById("todoadd").addEventListener("click", todoAdd);
+document.getElementById("todoinput").addEventListener("keydown", function(e){ if(e.key === "Enter") todoAdd(); });
+document.getElementById("anmeldungen").addEventListener("input", function(e){
+  state.anmeldungen = Math.max(0, parseInt(e.target.value || "0", 10) || 0);
+  sichern(); renderValid();
+});
+
+document.getElementById("export").addEventListener("click", function(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "cockpit-stand-" + new Date().toISOString().slice(0,10) + ".json";
+  a.click(); URL.revokeObjectURL(a.href);
+});
+document.getElementById("import").addEventListener("click", function(){ document.getElementById("importfile").click(); });
+document.getElementById("importfile").addEventListener("change", function(e){
+  var f = e.target.files[0]; if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try{
+      localStorage.setItem(KEY, r.result);
+      state = laden(); render();
+    }catch(err){ alert("Die Datei ließ sich nicht lesen. Bitte eine Sicherung aus diesem Cockpit wählen."); }
+  };
+  r.readAsText(f);
+});
+document.getElementById("pwchange").addEventListener("click", async function(){
+  var neu = prompt("Neues Passwort eingeben:");
+  if(!neu) return;
+  var h = await sha256(neu.trim());
+  localStorage.setItem("fp_pw", h);
+  prompt("Gilt ab sofort auf diesem Gerät.\n\nDamit es auf allen Geräten gilt: diese Zeile im Quelltext ersetzen.", 'var PW_HASH = "' + h + '";');
+});
+document.getElementById("reset").addEventListener("click", function(){
+  if(!confirm("Alle Häkchen, Links und Aufgaben zurücksetzen?")) return;
+  localStorage.removeItem(KEY); state = frisch(); render();
+});
+</script>
+</body>
+</html>
